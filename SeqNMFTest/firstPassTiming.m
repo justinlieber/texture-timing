@@ -90,6 +90,10 @@ clear getFullPsth;
 
 'got psth'
 
+%%
+
+save('fullPsth', 'fullPsth')
+
 
 %% Plot Traces
 
@@ -158,6 +162,10 @@ for cInd = 1:141
     end
     cInd
 end
+
+%%
+
+save('saveAllXCorr', 'saveAllXCorr')
 
 %%
 
@@ -241,7 +249,7 @@ axis square;
 
 %%
 
-bestIndShift = round((bestLag-mean(bestLag)).*1000);
+bestIndShift = round(bestLag)-mean(bestLag)).*1000);
 nanmean(bestIndShift);
 maxShift = max(abs(bestIndShift));
 
@@ -249,21 +257,32 @@ maxShift = max(abs(bestIndShift));
 maxShift = 160;
 
 
-tInd = 44;
+tInd = 51;
 
-baseIm = nan([size(fullPsth,1)+maxShift.*2 size(fullPsth,2)]);
+noShiftIm   = nan([size(fullPsth,1)+maxShift.*2 size(fullPsth,2)]);
+baseIm      = nan([size(fullPsth,1)+maxShift.*2 size(fullPsth,2)]);
 traceVar = [];
 for cInd=1:141
     indVals = (1:size(fullPsth,1))+maxShift+bestIndShift(cInd);
     thisTrace = nanmean(fullPsth(:,cInd,tInd,:),4);
     thisTrace = nanmean(fullPsth(:,cInd,tInd,:),4)./mean(thisTrace);
     traceVar(cInd) = nanstd(thisTrace);
+    
+    
+    noShiftIm((1:size(fullPsth,1))+maxShift,cInd) = thisTrace;
     baseIm(indVals,cInd) = thisTrace;
 end
 
 [~,cOrder] = sort(traceVar,'descend');
 
 clf;
+
+subplot(2,1,1);
+imagesc(noShiftIm(:,cOrder)');
+caxis([0 nanmedian(baseIm(:))+mad(baseIm(:),1)*3]);
+title(cdaData.fullRun.textures{tInd});
+
+subplot(2,1,2);
 imagesc(baseIm(:,cOrder)');
 caxis([0 nanmedian(baseIm(:))+mad(baseIm(:),1)*3]);
 title(cdaData.fullRun.textures{tInd});
